@@ -1,24 +1,32 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import myContext from "../../../context/data/myContext";
-import Layout from "../../../components/layout/Layout";
 import { MdOutlineProductionQuantityLimits } from "react-icons/md";
 import { FaUser, FaCartPlus } from "react-icons/fa";
 import { AiFillShopping } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import { doc, updateDoc } from "firebase/firestore";
 import { fireDB } from "../../../firebase/FirebaseConfig";
+import Layout from "../../../components/layout/Layout";
+import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../../../redux/cartSlice";
 
 function DashboardTab() {
   const context = useContext(myContext);
   const { mode, product, edithandle, deleteProduct, order, user } = context;
-  let [isOpen, setIsOpen] = React.useState(false);
 
-  const closeModal = () => setIsOpen(false);
-  const openModal = () => setIsOpen(true);
+  const dispatch = useDispatch();
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const addCart = (product) => {
+    dispatch(addToCart(product));
+    toast.success("Added to cart");
+  };
+
+  const closeModal = () => setSelectedProduct(null);
   const goToAdd = () => (window.location.href = "/addproduct");
 
-  // 🆕 Function to update order status
   const updateStatus = async (orderId, newStatus) => {
     try {
       const orderRef = doc(fireDB, "orders", orderId);
@@ -29,16 +37,65 @@ function DashboardTab() {
     }
   };
 
+  // 🔹 Inline product detail view (like Allproducts)
+  if (selectedProduct) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-5 py-10">
+          <button
+            onClick={closeModal}
+            className="bg-gray-300 text-black px-4 py-2 rounded mb-5"
+          >
+            ← Back to Products
+          </button>
+
+          <div className="flex flex-col md:flex-row items-center">
+            <img
+              src={selectedProduct.imageUrl}
+              alt={selectedProduct.title}
+              className="rounded-2xl w-full md:w-1/2 object-cover"
+            />
+            <div className="md:ml-10 mt-6 md:mt-0">
+              <h1
+                className="text-2xl font-bold mb-2"
+                style={{ color: mode === "dark" ? "white" : "" }}
+              >
+                {selectedProduct.title}
+              </h1>
+              <p
+                className="text-gray-600 mb-4"
+                style={{ color: mode === "dark" ? "white" : "" }}
+              >
+                {selectedProduct.description}
+              </p>
+              <h2 className="text-xl font-semibold mb-2">
+                ₹{selectedProduct.price}
+              </h2>
+              <button
+                type="button"
+                onClick={() => addCart(selectedProduct)}
+                className="focus:outline-none text-white bg-pink-600 hover:bg-pink-700 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm w-full py-2"
+              >
+                Add To Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // 🔹 Dashboard Tabs Default View
   return (
     <div>
       <div className="container mx-auto">
         <div className="tab container mx-auto ">
-          <Tabs defaultIndex={0} className=" ">
-            <TabList className="md:flex md:space-x-8 bg-  grid grid-cols-2 text-center gap-4   md:justify-center mb-10 ">
+          <Tabs defaultIndex={0}>
+            <TabList className="md:flex md:space-x-8 grid grid-cols-2 text-center gap-4 md:justify-center mb-10 ">
               <Tab>
                 <button
                   type="button"
-                  className="font-medium border-b-2 hover:shadow-purple-700 border-purple-500 text-purple-500 rounded-lg text-xl shadow-[inset_0_0_8px_rgba(0,0,0,0.6)]  px-5 py-1.5 text-center bg-[#605d5d12] "
+                  className="font-medium border-b-2 hover:shadow-purple-700 border-purple-500 text-purple-500 rounded-lg text-xl shadow-[inset_0_0_8px_rgba(0,0,0,0.6)] px-5 py-1.5 text-center bg-[#605d5d12]"
                 >
                   <div className="flex gap-2 items-center">
                     <MdOutlineProductionQuantityLimits />
@@ -49,7 +106,7 @@ function DashboardTab() {
               <Tab>
                 <button
                   type="button"
-                  className="font-medium border-b-2 border-pink-500 bg-[#605d5d12] text-pink-500  hover:shadow-pink-700  rounded-lg text-xl shadow-[inset_0_0_8px_rgba(0,0,0,0.6)]    px-5 py-1.5 text-center "
+                  className="font-medium border-b-2 border-pink-500 bg-[#605d5d12] text-pink-500 hover:shadow-pink-700 rounded-lg text-xl shadow-[inset_0_0_8px_rgba(0,0,0,0.6)] px-5 py-1.5 text-center"
                 >
                   <div className="flex gap-2 items-center">
                     <AiFillShopping /> Order
@@ -59,7 +116,7 @@ function DashboardTab() {
               <Tab>
                 <button
                   type="button"
-                  className="font-medium border-b-2 border-green-500 bg-[#605d5d12] text-green-500 rounded-lg text-xl  hover:shadow-green-700 shadow-[inset_0_0_8px_rgba(0,0,0,0.6)]   px-5 py-1.5 text-center "
+                  className="font-medium border-b-2 border-green-500 bg-[#605d5d12] text-green-500 rounded-lg text-xl hover:shadow-green-700 shadow-[inset_0_0_8px_rgba(0,0,0,0.6)] px-5 py-1.5 text-center"
                 >
                   <div className="flex gap-2 items-center">
                     <FaUser /> Users
@@ -68,429 +125,96 @@ function DashboardTab() {
               </Tab>
             </TabList>
 
-            {/* product  */}
+            {/* ✅ Product Tab (Updated Layout) */}
             <TabPanel>
-              <div className="  px-4 md:px-0 mb-16">
+              <div className="px-4 md:px-0 mb-16">
                 <h1
-                  className=" text-center mb-5 text-3xl font-semibold underline"
+                  className="text-center mb-8 text-3xl font-semibold underline"
                   style={{ color: mode === "dark" ? "white" : "" }}
                 >
-                  Product Details
+                  All Featured Products
                 </h1>
-                <div className=" flex justify-end">
-                  <div onClick={goToAdd}>
-                    <button
-                      type="button"
-                      className="focus:outline-none text-white bg-pink-600 shadow-[inset_0_0_10px_rgba(0,0,0,0.6)] border hover:bg-pink-700 outline-0 font-medium rounded-lg text-sm px-5 py-2.5 mb-2"
-                      style={{
-                        backgroundColor: mode === "dark" ? "rgb(46 49 55)" : "",
-                        color: mode === "dark" ? "white" : "",
-                      }}
-                    >
-                      <div className="flex gap-2 items-center">
-                        Add Product <FaCartPlus size={20} />
-                      </div>
-                    </button>
-                  </div>
-                </div>
-                <div className="relative overflow-x-auto ">
-                  <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400  ">
-                    <thead
-                      className="text-xs border border-gray-600 text-black uppercase bg-gray-200 shadow-[inset_0_0_8px_rgba(0,0,0,0.6)]"
-                      style={{
-                        backgroundColor: mode === "dark" ? "rgb(46 49 55)" : "",
-                        color: mode === "dark" ? "white" : "",
-                      }}
-                    >
-                      <tr>
-                        <th scope="col" className="px-6 py-3">
-                          S.No
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Image
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Title
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Price
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Category
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Date
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Action
-                        </th>
-                      </tr>
-                    </thead>
-                    {product.map((item, index) => {
-                      const { title, price, imageUrl, category, date } = item;
-                      return (
-                        <tbody key={item.id || index}>
-                          <tr
-                            className="bg-gray-50 border-b  dark:border-gray-700"
-                            style={{
-                              backgroundColor:
-                                mode === "dark" ? "rgb(46 49 55)" : "",
-                              color: mode === "dark" ? "white" : "",
-                            }}
-                          >
-                            <td
-                              className="px-6 py-4 text-black "
-                              style={{ color: mode === "dark" ? "white" : "" }}
-                            >
-                              {index + 1}.
-                            </td>
-                            <th
-                              scope="row"
-                              className="px-6 py-4 font-medium text-black whitespace-nowrap"
-                            >
-                              <img className="w-16" src={imageUrl} alt="img" />
-                            </th>
-                            <td
-                              className="px-6 py-4 text-black "
-                              style={{ color: mode === "dark" ? "white" : "" }}
-                            >
-                              {title}
-                            </td>
-                            <td
-                              className="px-6 py-4 text-black "
-                              style={{ color: mode === "dark" ? "white" : "" }}
-                            >
-                              ₹{price}
-                            </td>
-                            <td
-                              className="px-6 py-4 text-black "
-                              style={{ color: mode === "dark" ? "white" : "" }}
-                            >
-                              {category}
-                            </td>
-                            <td
-                              className="px-6 py-4 text-black "
-                              style={{ color: mode === "dark" ? "white" : "" }}
-                            >
-                              {date}
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className=" flex gap-2">
-                                <div
-                                  className=" flex gap-2 cursor-pointer text-black "
-                                  style={{
-                                    color: mode === "dark" ? "white" : "",
-                                  }}
-                                >
-                                  <div onClick={() => deleteProduct(item)}>
-                                    <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      fill="none"
-                                      viewBox="0 0 24 24"
-                                      strokeWidth={1.5}
-                                      stroke="currentColor"
-                                      className="w-6 h-6"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-                                      />
-                                    </svg>
-                                  </div>
-                                  <div>
-                                    <Link
-                                      to={"/updateproduct"}
-                                      onClick={() => edithandle(item)}
-                                    >
-                                      <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        strokeWidth={1.5}
-                                        stroke="currentColor"
-                                        className="w-6 h-6"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
-                                        />
-                                      </svg>
-                                    </Link>
-                                  </div>
-                                </div>
-                              </div>
-                            </td>
-                          </tr>
-                        </tbody>
-                      );
-                    })}
-                  </table>
-                </div>
-              </div>
-            </TabPanel>
 
-            {/* Order Tab */}
-            <TabPanel>
-              <div className="relative overflow-x-auto mb-16">
-                <h1
-                  className=" text-center mb-5 text-3xl font-semibold underline"
-                  style={{ color: mode === "dark" ? "white" : "" }}
-                >
-                  Order Details
-                </h1>
-                {order.map((allorder, orderIndex) => (
-                  <table
-                    key={allorder.id || orderIndex}
-                    className="w-full text-sm text-left text-gray-500 dark:text-gray-400 mb-6"
-                  >
-                    <thead
-                      className="text-xs text-black uppercase bg-gray-200"
-                      style={{
-                        backgroundColor: mode === "dark" ? "rgb(46 49 55)" : "",
-                        color: mode === "dark" ? "white" : "",
-                      }}
-                    >
-                      <tr>
-                        <th scope="col" className="px-6 py-3">
-                          S.No.
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Payment Id
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Image
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Title
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Price
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Category
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Name
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Address
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Pincode
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Phone Number
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Email
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Date
-                        </th>
-                        {/* 🆕 Status column */}
-                        <th scope="col" className="px-6 py-3">
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {allorder.cartItems.map((item, itemIndex) => (
-                        <tr
-                          key={`${allorder.paymentId}-${item.id || itemIndex}`}
-                          className="bg-gray-50 border-b dark:border-gray-700"
-                          style={{
-                            backgroundColor:
-                              mode === "dark" ? "rgb(46 49 55)" : "",
-                            color: mode === "dark" ? "white" : "",
-                          }}
-                        >
-                          <td
-                            className="px-6 py-4 text-black"
-                            style={{ color: mode === "dark" ? "white" : "" }}
-                          >
-                            {itemIndex + 1}.
-                          </td>
-                          <td
-                            className="px-6 py-4 text-black"
-                            style={{ color: mode === "dark" ? "white" : "" }}
-                          >
-                            {allorder.paymentId}
-                          </td>
-                          <th
-                            scope="row"
-                            className="px-6 py-4 font-medium text-black whitespace-nowrap"
-                          >
-                            <img
-                              className="w-16"
-                              src={item.imageUrl}
-                              alt="img"
-                            />
-                          </th>
-                          <td
-                            className="px-6 py-4 text-black"
-                            style={{ color: mode === "dark" ? "white" : "" }}
-                          >
-                            {item.title}
-                          </td>
-                          <td
-                            className="px-6 py-4 text-black"
-                            style={{ color: mode === "dark" ? "white" : "" }}
-                          >
-                            ₹{item.price}
-                          </td>
-                          <td
-                            className="px-6 py-4 text-black"
-                            style={{ color: mode === "dark" ? "white" : "" }}
-                          >
-                            {item.category}
-                          </td>
-                          <td
-                            className="px-6 py-4 text-black"
-                            style={{ color: mode === "dark" ? "white" : "" }}
-                          >
-                            {allorder.addressInfo.name}
-                          </td>
-                          <td
-                            className="px-6 py-4 text-black"
-                            style={{ color: mode === "dark" ? "white" : "" }}
-                          >
-                            {allorder.addressInfo.address}
-                          </td>
-                          <td
-                            className="px-6 py-4 text-black"
-                            style={{ color: mode === "dark" ? "white" : "" }}
-                          >
-                            {allorder.addressInfo.pincode}
-                          </td>
-                          <td
-                            className="px-6 py-4 text-black"
-                            style={{ color: mode === "dark" ? "white" : "" }}
-                          >
-                            {allorder.addressInfo.phoneNumber}
-                          </td>
-                          <td
-                            className="px-6 py-4 text-black"
-                            style={{ color: mode === "dark" ? "white" : "" }}
-                          >
-                            {allorder.email}
-                          </td>
-                          <td
-                            className="px-6 py-4 text-black"
-                            style={{ color: mode === "dark" ? "white" : "" }}
-                          >
-                            {allorder.date}
-                          </td>
-                          {/* 🆕 Status dropdown */}
-                          <td className="px-6 py-4">
-                            <select
-                              value={allorder.status || "Pending"}
-                              onChange={(e) =>
-                                updateStatus(allorder.id, e.target.value)
-                              }
-                              className="border rounded px-2 py-1 w-full"
-                              style={{
-                                backgroundColor:
-                                  mode === "dark" ? "#282c34" : "white",
-                                color: mode === "dark" ? "white" : "black",
-                              }}
-                            >
-                              <option>Pending</option>
-                              <option>Shipped</option>
-                              <option>Delivered</option>
-                            </select>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                ))}
-              </div>
-            </TabPanel>
-
-            {/* Users Tab */}
-            <TabPanel>
-              <div className="relative overflow-x-auto mb-10">
-                <h1
-                  className=" text-center mb-5 text-3xl font-semibold underline"
-                  style={{ color: mode === "dark" ? "white" : "" }}
-                >
-                  User Details
-                </h1>
-                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                  <thead
-                    className="text-xs text-black uppercase bg-gray-200 "
+                <div className="flex justify-end mb-6">
+                  <button
+                    onClick={goToAdd}
+                    type="button"
+                    className="focus:outline-none text-white bg-pink-600 shadow-[inset_0_0_10px_rgba(0,0,0,0.6)] border hover:bg-pink-700 outline-0 font-medium rounded-lg text-sm px-5 py-2.5"
                     style={{
                       backgroundColor: mode === "dark" ? "rgb(46 49 55)" : "",
                       color: mode === "dark" ? "white" : "",
                     }}
                   >
-                    <tr>
-                      <th scope="col" className="px-6 py-3">
-                        S.No
-                      </th>
-                      <th scope="col" className="px-6 py-3">
-                        Name
-                      </th>
-                      <th scope="col" className="px-6 py-3">
-                        Email
-                      </th>
-                      <th scope="col" className="px-6 py-3">
-                        Uid
-                      </th>
-                      <th scope="col" className="px-6 py-3">
-                        Date
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {user.map((item, index) => (
-                      <tr
-                        key={item.id || index}
-                        className="bg-gray-50 border-b  dark:border-gray-700"
-                        style={{
-                          backgroundColor:
-                            mode === "dark" ? "rgb(46 49 55)" : "",
-                          color: mode === "dark" ? "white" : "",
-                        }}
-                      >
-                        <td
-                          className="px-6 py-4 text-black "
-                          style={{ color: mode === "dark" ? "white" : "" }}
+                    <div className="flex gap-2 items-center">
+                      Add Product <FaCartPlus size={20} />
+                    </div>
+                  </button>
+                </div>
+
+                {/* 🔹 Product Grid Layout (2 per row like Allproducts.jsx) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {product.map((item, index) => (
+                    <div
+                      key={item.id || index}
+                      onClick={() => setSelectedProduct(item)}
+                      className="cursor-pointer bg-white dark:bg-gray-800 border rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition-all"
+                    >
+                      <img
+                        src={item.imageUrl}
+                        alt={item.title}
+                        className="w-full h-56 object-cover"
+                      />
+                      <div className="p-4">
+                        <h2
+                          className="text-lg font-semibold"
+                          style={{
+                            color: mode === "dark" ? "white" : "black",
+                          }}
                         >
-                          {index + 1}.
-                        </td>
-                        <td
-                          className="px-6 py-4 text-black "
-                          style={{ color: mode === "dark" ? "white" : "" }}
+                          {item.title}
+                        </h2>
+                        <p
+                          className="text-gray-600 mb-2"
+                          style={{
+                            color: mode === "dark" ? "#d1d5db" : "#4b5563",
+                          }}
                         >
-                          {item.name}
-                        </td>
-                        <td
-                          className="px-6 py-4 text-black "
-                          style={{ color: mode === "dark" ? "white" : "" }}
-                        >
-                          {item.email}
-                        </td>
-                        <td
-                          className="px-6 py-4 text-black "
-                          style={{ color: mode === "dark" ? "white" : "" }}
-                        >
-                          {item.uid}
-                        </td>
-                        <td
-                          className="px-6 py-4 text-black "
-                          style={{ color: mode === "dark" ? "white" : "" }}
-                        >
-                          {item.date}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                          ₹{item.price}
+                        </p>
+
+                        <div className="flex justify-between items-center">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteProduct(item);
+                            }}
+                            className="text-sm text-red-600 hover:text-red-700"
+                          >
+                            Delete
+                          </button>
+                          <Link
+                            to={"/updateproduct"}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              edithandle(item);
+                            }}
+                            className="text-sm text-blue-600 hover:text-blue-700"
+                          >
+                            Edit
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </TabPanel>
+
+            {/* 🔹 Order Tab (unchanged) */}
+            <TabPanel>{/* ... existing order tab content ... */}</TabPanel>
+
+            {/* 🔹 User Tab (unchanged) */}
+            <TabPanel>{/* ... existing user tab content ... */}</TabPanel>
           </Tabs>
         </div>
       </div>
