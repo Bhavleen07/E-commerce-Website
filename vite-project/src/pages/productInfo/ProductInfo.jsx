@@ -22,11 +22,12 @@ function ProductInfo() {
   const getProductData = async () => {
     setLoading(true);
     try {
+      console.log("Fetching product with ID:", params.id); // 🔹 debug
       const docRef = doc(fireDB, "products", params.id);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        setProduct(docSnap.data());
+        setProduct({ ...docSnap.data(), id: docSnap.id });
       } else {
         toast.error("Product not found");
         navigate("/allproducts"); // fallback

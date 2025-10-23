@@ -18,8 +18,8 @@ function DashboardTab() {
 
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart);
-  const navigate = useNavigate(); // added navigate
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const navigate = useNavigate(); // 🔹 Add navigate
 
   const addCart = (product) => {
     dispatch(addToCart(product));
@@ -39,7 +39,7 @@ function DashboardTab() {
     }
   };
 
-  // 🔹 Selected product view (optional, keeps modal functionality)
+  // 🔹 Selected product view
   if (selectedProduct) {
     return (
       <Layout>
@@ -186,7 +186,7 @@ function DashboardTab() {
                                 mode === "dark" ? "rgb(46 49 55)" : "",
                               color: mode === "dark" ? "white" : "",
                             }}
-                            onClick={() => navigate(`/productinfo/${item.id}`)} // <-- Fixed navigation
+                            onClick={() => navigate(`/productinfo/${item.id}`)} // 🔹 Updated
                           >
                             <td className="px-6 py-4">{index + 1}.</td>
                             <th
@@ -211,14 +211,14 @@ function DashboardTab() {
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <div onClick={() => deleteProduct(item)}>
-                                  {/* delete icon here */}
+                                  {/* delete icon */}
                                 </div>
                                 <div>
                                   <Link
                                     to={"/updateproduct"}
                                     onClick={() => edithandle(item)}
                                   >
-                                    {/* edit icon here */}
+                                    {/* edit icon */}
                                   </Link>
                                 </div>
                               </div>
