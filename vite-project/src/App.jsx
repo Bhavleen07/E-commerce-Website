@@ -39,6 +39,7 @@ function App() {
           <Route path="/bulk-orders" element={<BulkOrders />} />
           {/* No need to navigate from Dashboard to ProductInfo anymore */}
           <Route path="/allproducts" element={<AllProducts />} />
+          <Route path="/productinfo/:id" element={<ProductInfo />} />
           <Route path="/*" element={<NoPage />} />
 
           {/* Protected Routes (user only) */}

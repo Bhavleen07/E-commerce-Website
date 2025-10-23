@@ -5,6 +5,7 @@ import myContext from "../../context/data/myContext";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../redux/cartSlice";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 function Allproducts() {
   const context = useContext(myContext);
@@ -17,6 +18,8 @@ function Allproducts() {
     dispatch(addToCart(product));
     toast.success("Added to cart");
   };
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cartItems));
@@ -61,7 +64,7 @@ function Allproducts() {
               const { title, price, imageUrl, id } = item;
               return (
                 <div
-                  onClick={() => (window.location.href = `/productinfo/${id}`)}
+                  onClick={() => navigate(`/productinfo/${id}`)}
                   key={index}
                   className="cursor-pointer border-2 hover:shadow-xl transition-shadow duration-300 ease-in-out border-gray-200 border-opacity-60 rounded-2xl overflow-hidden"
                   style={{
