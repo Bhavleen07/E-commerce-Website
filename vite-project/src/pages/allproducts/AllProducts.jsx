@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Filter from "../../components/filter/Filter";
 import ProductCard from "../../components/productCard/ProductCard";
 import Layout from "../../components/layout/Layout";
@@ -13,6 +13,8 @@ function Allproducts() {
 
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart);
+
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const addCart = (product) => {
     dispatch(addToCart(product));
@@ -43,6 +45,55 @@ function Allproducts() {
       return obj.price >= min && obj.price <= max;
     });
 
+  // 🔹 Show selected product details inside same page
+  if (selectedProduct) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-5 py-10">
+          <button
+            onClick={() => setSelectedProduct(null)}
+            className="bg-gray-300 text-black px-4 py-2 rounded mb-5"
+          >
+            ← Back to Products
+          </button>
+
+          <div className="flex flex-col md:flex-row items-center">
+            <img
+              src={selectedProduct.imageUrl}
+              alt={selectedProduct.title}
+              className="rounded-2xl w-full md:w-1/2 object-cover"
+            />
+            <div className="md:ml-10 mt-6 md:mt-0">
+              <h1
+                className="text-2xl font-bold mb-2"
+                style={{ color: mode === "dark" ? "white" : "" }}
+              >
+                {selectedProduct.title}
+              </h1>
+              <p
+                className="text-gray-600 mb-4"
+                style={{ color: mode === "dark" ? "white" : "" }}
+              >
+                {selectedProduct.description}
+              </p>
+              <h2 className="text-xl font-semibold mb-2">
+                ₹{selectedProduct.price}
+              </h2>
+              <button
+                type="button"
+                onClick={() => addCart(selectedProduct)}
+                className="focus:outline-none text-white bg-pink-600 hover:bg-pink-700 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm w-full py-2"
+              >
+                Add To Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // 🔹 Default: show all products
   return (
     <Layout>
       <Filter />
@@ -63,7 +114,7 @@ function Allproducts() {
               const { title, price, imageUrl, id } = item;
               return (
                 <div
-                  onClick={() => (window.location.href = `/productinfo/${id}`)}
+                  onClick={() => setSelectedProduct(item)}
                   key={index}
                   className="cursor-pointer border-2 hover:shadow-gray-100 hover:shadow-2xl transition-shadow duration-300 ease-in-out border-gray-200 border-opacity-60 rounded-2xl overflow-hidden"
                   style={{
