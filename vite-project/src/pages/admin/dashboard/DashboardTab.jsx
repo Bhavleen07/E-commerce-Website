@@ -4,7 +4,7 @@ import myContext from "../../../context/data/myContext";
 import { MdOutlineProductionQuantityLimits } from "react-icons/md";
 import { FaUser, FaCartPlus } from "react-icons/fa";
 import { AiFillShopping } from "react-icons/ai";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { doc, updateDoc } from "firebase/firestore";
 import { fireDB } from "../../../firebase/FirebaseConfig";
 import Layout from "../../../components/layout/Layout";
@@ -18,6 +18,7 @@ function DashboardTab() {
 
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart);
+  const navigate = useNavigate(); // added navigate
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   const addCart = (product) => {
@@ -38,7 +39,7 @@ function DashboardTab() {
     }
   };
 
-  // 🔹 Selected product view
+  // 🔹 Selected product view (optional, keeps modal functionality)
   if (selectedProduct) {
     return (
       <Layout>
@@ -185,7 +186,7 @@ function DashboardTab() {
                                 mode === "dark" ? "rgb(46 49 55)" : "",
                               color: mode === "dark" ? "white" : "",
                             }}
-                            onClick={() => setSelectedProduct(item)}
+                            onClick={() => navigate(`/productinfo/${item.id}`)} // <-- Fixed navigation
                           >
                             <td className="px-6 py-4">{index + 1}.</td>
                             <th
