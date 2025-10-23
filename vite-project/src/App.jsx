@@ -37,9 +37,9 @@ function App() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/bulk-orders" element={<BulkOrders />} />
-          <Route path="/productinfo/:id" element={<ProductInfo />} />
-          <Route path="/*" element={<NoPage />} />
+          {/* No need to navigate from Dashboard to ProductInfo anymore */}
           <Route path="/allproducts" element={<AllProducts />} />
+          <Route path="/*" element={<NoPage />} />
 
           {/* Protected Routes (user only) */}
           <Route
@@ -114,7 +114,7 @@ export const ProtectedRoutesForAdmin = ({ children }) => {
   }
 
   const admin = JSON.parse(storedUser);
-  const email = admin?.email || admin?.user?.email; // ✅ unified check
+  const email = admin?.email || admin?.user?.email; // unified check
 
   if (email === "kaurkraftshop@gmail.com") {
     return children;
