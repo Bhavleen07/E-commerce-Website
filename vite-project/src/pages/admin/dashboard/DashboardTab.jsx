@@ -38,7 +38,7 @@ function DashboardTab() {
     }
   };
 
-  // 🔹 If a product is selected, show its details inline (like Allproducts)
+  // 🔹 Selected product view
   if (selectedProduct) {
     return (
       <Layout>
@@ -50,13 +50,16 @@ function DashboardTab() {
             ← Back to Products
           </button>
 
-          <div className="flex flex-col md:flex-row items-center">
-            <img
-              src={selectedProduct.imageUrl}
-              alt={selectedProduct.title}
-              className="rounded-2xl w-full md:w-1/2 object-cover"
-            />
-            <div className="md:ml-10 mt-6 md:mt-0">
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className="w-full md:w-1/2 overflow-hidden rounded-2xl">
+              <img
+                src={selectedProduct.imageUrl || "/placeholder.png"}
+                alt={selectedProduct.title || "Product"}
+                className="w-full h-64 md:h-96 object-cover rounded-2xl"
+              />
+            </div>
+
+            <div className="md:ml-10 mt-4 md:mt-0 w-full md:w-1/2">
               <h1
                 className="text-2xl font-bold mb-2"
                 style={{ color: mode === "dark" ? "white" : "" }}
@@ -67,10 +70,10 @@ function DashboardTab() {
                 className="text-gray-600 mb-4"
                 style={{ color: mode === "dark" ? "white" : "" }}
               >
-                {selectedProduct.description}
+                {selectedProduct.description || "No description available."}
               </p>
               <h2 className="text-xl font-semibold mb-2">
-                ₹{selectedProduct.price}
+                ₹{selectedProduct.price || "-"}
               </h2>
               <button
                 type="button"
@@ -86,17 +89,17 @@ function DashboardTab() {
     );
   }
 
-  // 🔹 Default: Normal Dashboard Tabs view
+  // 🔹 Default Dashboard Tabs
   return (
     <div>
       <div className="container mx-auto">
         <div className="tab container mx-auto ">
-          <Tabs defaultIndex={0} className=" ">
+          <Tabs defaultIndex={0}>
             <TabList className="md:flex md:space-x-8 grid grid-cols-2 text-center gap-4 md:justify-center mb-10 ">
               <Tab>
                 <button
                   type="button"
-                  className="font-medium border-b-2 hover:shadow-purple-700 border-purple-500 text-purple-500 rounded-lg text-xl shadow-[inset_0_0_8px_rgba(0,0,0,0.6)]  px-5 py-1.5 text-center bg-[#605d5d12] "
+                  className="font-medium border-b-2 hover:shadow-purple-700 border-purple-500 text-purple-500 rounded-lg text-xl shadow-[inset_0_0_8px_rgba(0,0,0,0.6)]  px-5 py-1.5 text-center bg-[#605d5d12]"
                 >
                   <div className="flex gap-2 items-center">
                     <MdOutlineProductionQuantityLimits />
@@ -107,7 +110,7 @@ function DashboardTab() {
               <Tab>
                 <button
                   type="button"
-                  className="font-medium border-b-2 border-pink-500 bg-[#605d5d12] text-pink-500  hover:shadow-pink-700  rounded-lg text-xl shadow-[inset_0_0_8px_rgba(0,0,0,0.6)]    px-5 py-1.5 text-center "
+                  className="font-medium border-b-2 border-pink-500 bg-[#605d5d12] text-pink-500  hover:shadow-pink-700  rounded-lg text-xl shadow-[inset_0_0_8px_rgba(0,0,0,0.6)] px-5 py-1.5 text-center "
                 >
                   <div className="flex gap-2 items-center">
                     <AiFillShopping /> Order
@@ -117,7 +120,7 @@ function DashboardTab() {
               <Tab>
                 <button
                   type="button"
-                  className="font-medium border-b-2 border-green-500 bg-[#605d5d12] text-green-500 rounded-lg text-xl  hover:shadow-green-700 shadow-[inset_0_0_8px_rgba(0,0,0,0.6)]   px-5 py-1.5 text-center "
+                  className="font-medium border-b-2 border-green-500 bg-[#605d5d12] text-green-500 rounded-lg text-xl  hover:shadow-green-700 shadow-[inset_0_0_8px_rgba(0,0,0,0.6)] px-5 py-1.5 text-center "
                 >
                   <div className="flex gap-2 items-center">
                     <FaUser /> Users
@@ -126,7 +129,7 @@ function DashboardTab() {
               </Tab>
             </TabList>
 
-            {/* ✅ Product Tab */}
+            {/* Product Tab */}
             <TabPanel>
               <div className="px-4 md:px-0 mb-16">
                 <h1
@@ -135,11 +138,11 @@ function DashboardTab() {
                 >
                   Product Details
                 </h1>
-                <div className="flex justify-end">
+                <div className="flex justify-end mb-4">
                   <div onClick={goToAdd}>
                     <button
                       type="button"
-                      className="focus:outline-none text-white bg-pink-600 shadow-[inset_0_0_10px_rgba(0,0,0,0.6)] border hover:bg-pink-700 outline-0 font-medium rounded-lg text-sm px-5 py-2.5 mb-2"
+                      className="focus:outline-none text-white bg-pink-600 shadow-[inset_0_0_10px_rgba(0,0,0,0.6)] border hover:bg-pink-700 outline-0 font-medium rounded-lg text-sm px-5 py-2.5"
                       style={{
                         backgroundColor: mode === "dark" ? "rgb(46 49 55)" : "",
                         color: mode === "dark" ? "white" : "",
@@ -152,7 +155,7 @@ function DashboardTab() {
                   </div>
                 </div>
 
-                <div className="relative overflow-x-auto ">
+                <div className="relative overflow-x-auto">
                   <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                     <thead
                       className="text-xs border border-gray-600 text-black uppercase bg-gray-200 shadow-[inset_0_0_8px_rgba(0,0,0,0.6)]"
@@ -162,27 +165,13 @@ function DashboardTab() {
                       }}
                     >
                       <tr>
-                        <th scope="col" className="px-6 py-3">
-                          S.No
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Image
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Title
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Price
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Category
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Date
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                          Action
-                        </th>
+                        <th className="px-6 py-3">S.No</th>
+                        <th className="px-6 py-3">Image</th>
+                        <th className="px-6 py-3">Title</th>
+                        <th className="px-6 py-3">Price</th>
+                        <th className="px-6 py-3">Category</th>
+                        <th className="px-6 py-3">Date</th>
+                        <th className="px-6 py-3">Action</th>
                       </tr>
                     </thead>
                     {product.map((item, index) => {
@@ -190,7 +179,7 @@ function DashboardTab() {
                       return (
                         <tbody key={item.id || index}>
                           <tr
-                            className="bg-gray-50 border-b dark:border-gray-700 cursor-pointer hover:bg-gray-100"
+                            className="bg-gray-50 border-b dark:border-gray-700 cursor-pointer hover:shadow-lg transition-shadow duration-300"
                             style={{
                               backgroundColor:
                                 mode === "dark" ? "rgb(46 49 55)" : "",
@@ -198,85 +187,37 @@ function DashboardTab() {
                             }}
                             onClick={() => setSelectedProduct(item)}
                           >
-                            <td
-                              className="px-6 py-4 text-black "
-                              style={{ color: mode === "dark" ? "white" : "" }}
-                            >
-                              {index + 1}.
-                            </td>
+                            <td className="px-6 py-4">{index + 1}.</td>
                             <th
                               scope="row"
-                              className="px-6 py-4 font-medium text-black whitespace-nowrap"
+                              className="px-6 py-4 font-medium whitespace-nowrap"
                             >
-                              <img className="w-16" src={imageUrl} alt="img" />
+                              <div className="w-20 h-20 overflow-hidden rounded-2xl">
+                                <img
+                                  className="w-full h-full object-cover"
+                                  src={imageUrl || "/placeholder.png"}
+                                  alt={title || "Product"}
+                                />
+                              </div>
                             </th>
-                            <td
-                              className="px-6 py-4 text-black "
-                              style={{ color: mode === "dark" ? "white" : "" }}
-                            >
-                              {title}
-                            </td>
-                            <td
-                              className="px-6 py-4 text-black "
-                              style={{ color: mode === "dark" ? "white" : "" }}
-                            >
-                              ₹{price}
-                            </td>
-                            <td
-                              className="px-6 py-4 text-black "
-                              style={{ color: mode === "dark" ? "white" : "" }}
-                            >
-                              {category}
-                            </td>
-                            <td
-                              className="px-6 py-4 text-black "
-                              style={{ color: mode === "dark" ? "white" : "" }}
-                            >
-                              {date}
-                            </td>
+                            <td className="px-6 py-4">{title}</td>
+                            <td className="px-6 py-4">₹{price}</td>
+                            <td className="px-6 py-4">{category}</td>
+                            <td className="px-6 py-4">{date}</td>
                             <td className="px-6 py-4">
                               <div
-                                className="flex gap-2 cursor-pointer text-black"
-                                style={{
-                                  color: mode === "dark" ? "white" : "",
-                                }}
+                                className="flex gap-2 cursor-pointer"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <div onClick={() => deleteProduct(item)}>
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    strokeWidth={1.5}
-                                    stroke="currentColor"
-                                    className="w-6 h-6"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c..."
-                                    />
-                                  </svg>
+                                  {/* delete icon here */}
                                 </div>
                                 <div>
                                   <Link
                                     to={"/updateproduct"}
                                     onClick={() => edithandle(item)}
                                   >
-                                    <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      fill="none"
-                                      viewBox="0 0 24 24"
-                                      strokeWidth={1.5}
-                                      stroke="currentColor"
-                                      className="w-6 h-6"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M16.862 4.487l1.687-1.688a1.875 1.875 0..."
-                                      />
-                                    </svg>
+                                    {/* edit icon here */}
                                   </Link>
                                 </div>
                               </div>
@@ -290,17 +231,11 @@ function DashboardTab() {
               </div>
             </TabPanel>
 
-            {/* 🔹 Order Tab */}
-            <TabPanel>
-              {/* your order tab code unchanged */}
-              {/* ... */}
-            </TabPanel>
+            {/* Order Tab */}
+            <TabPanel>{/* unchanged code */}</TabPanel>
 
-            {/* 🔹 User Tab */}
-            <TabPanel>
-              {/* your user tab code unchanged */}
-              {/* ... */}
-            </TabPanel>
+            {/* User Tab */}
+            <TabPanel>{/* unchanged code */}</TabPanel>
           </Tabs>
         </div>
       </div>

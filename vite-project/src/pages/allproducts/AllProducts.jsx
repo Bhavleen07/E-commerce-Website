@@ -1,6 +1,5 @@
 import React, { useContext, useEffect } from "react";
 import Filter from "../../components/filter/Filter";
-import ProductCard from "../../components/productCard/ProductCard";
 import Layout from "../../components/layout/Layout";
 import myContext from "../../context/data/myContext";
 import { useDispatch, useSelector } from "react-redux";
@@ -27,7 +26,6 @@ function Allproducts() {
     window.scrollTo(0, 0);
   }, []);
 
-  // Function to filter products
   const filteredProducts = product
     .filter((obj) =>
       obj.title.toLowerCase().includes(searchkey ? searchkey.toLowerCase() : "")
@@ -38,7 +36,7 @@ function Allproducts() {
         .includes(filterType ? filterType.toLowerCase() : "")
     )
     .filter((obj) => {
-      if (!filterPrice) return true; // No price filter
+      if (!filterPrice) return true;
       const [min, max] = filterPrice.split("-").map(Number);
       return obj.price >= min && obj.price <= max;
     });
@@ -58,22 +56,22 @@ function Allproducts() {
             <div className="h-1 w-20 bg-pink-600 rounded"></div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 auto-rows-fr">
             {filteredProducts.map((item, index) => {
               const { title, price, imageUrl, id } = item;
               return (
                 <div
                   onClick={() => (window.location.href = `/productinfo/${id}`)}
                   key={index}
-                  className="cursor-pointer border-2 hover:shadow-gray-100 hover:shadow-2xl transition-shadow duration-300 ease-in-out border-gray-200 border-opacity-60 rounded-2xl overflow-hidden"
+                  className="cursor-pointer border-2 hover:shadow-xl transition-shadow duration-300 ease-in-out border-gray-200 border-opacity-60 rounded-2xl overflow-hidden"
                   style={{
                     backgroundColor: mode === "dark" ? "rgb(46 49 55)" : "",
                     color: mode === "dark" ? "white" : "",
                   }}
                 >
-                  <div className="flex justify-center">
+                  <div className="overflow-hidden w-full h-56 sm:h-64 md:h-72 rounded-t-2xl">
                     <img
-                      className="rounded-2xl w-full h-40 sm:h-56 md:h-64 p-2 object-cover hover:scale-105 transition-transform duration-300 ease-in-out"
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 ease-in-out"
                       src={imageUrl}
                       alt={title}
                     />
