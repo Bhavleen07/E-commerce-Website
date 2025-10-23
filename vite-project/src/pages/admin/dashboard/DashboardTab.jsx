@@ -233,10 +233,124 @@ function DashboardTab() {
             </TabPanel>
 
             {/* Order Tab */}
-            <TabPanel>{/* unchanged code */}</TabPanel>
+            <TabPanel>
+              <div className="px-4 md:px-0 mb-16">
+                <h1
+                  className="text-center mb-5 text-3xl font-semibold underline"
+                  style={{ color: mode === "dark" ? "white" : "" }}
+                >
+                  Order Details
+                </h1>
+
+                <div className="relative overflow-x-auto">
+                  <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                    <thead
+                      className="text-xs border border-gray-600 text-black uppercase bg-gray-200 shadow-[inset_0_0_8px_rgba(0,0,0,0.6)]"
+                      style={{
+                        backgroundColor: mode === "dark" ? "rgb(46 49 55)" : "",
+                        color: mode === "dark" ? "white" : "",
+                      }}
+                    >
+                      <tr>
+                        <th className="px-6 py-3">S.No</th>
+                        <th className="px-6 py-3">User</th>
+                        <th className="px-6 py-3">Products</th>
+                        <th className="px-6 py-3">Total Price</th>
+                        <th className="px-6 py-3">Status</th>
+                        <th className="px-6 py-3">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {order.map((item, index) => (
+                        <tr
+                          key={item.id || index}
+                          className="bg-gray-50 border-b dark:border-gray-700 hover:shadow-lg transition-shadow duration-300"
+                          style={{
+                            backgroundColor:
+                              mode === "dark" ? "rgb(46 49 55)" : "",
+                            color: mode === "dark" ? "white" : "",
+                          }}
+                        >
+                          <td className="px-6 py-4">{index + 1}</td>
+                          <td className="px-6 py-4">
+                            {item.userName || "N/A"}
+                          </td>
+                          <td className="px-6 py-4">
+                            {item.products && item.products.length > 0
+                              ? item.products.join(", ")
+                              : "-"}
+                          </td>
+                          <td className="px-6 py-4">₹{item.totalPrice || 0}</td>
+                          <td className="px-6 py-4">{item.status}</td>
+                          <td className="px-6 py-4">
+                            <select
+                              value={item.status}
+                              onChange={(e) =>
+                                updateStatus(item.id, e.target.value)
+                              }
+                              className="border px-2 py-1 rounded bg-white dark:bg-gray-700 text-black dark:text-white"
+                            >
+                              <option value="Pending">Pending</option>
+                              <option value="Delivered">Delivered</option>
+                              <option value="Completed">Completed</option>
+                            </select>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </TabPanel>
 
             {/* User Tab */}
-            <TabPanel>{/* unchanged code */}</TabPanel>
+            <TabPanel>
+              <div className="px-4 md:px-0 mb-16">
+                <h1
+                  className="text-center mb-5 text-3xl font-semibold underline"
+                  style={{ color: mode === "dark" ? "white" : "" }}
+                >
+                  User Details
+                </h1>
+
+                <div className="relative overflow-x-auto">
+                  <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                    <thead
+                      className="text-xs border border-gray-600 text-black uppercase bg-gray-200 shadow-[inset_0_0_8px_rgba(0,0,0,0.6)]"
+                      style={{
+                        backgroundColor: mode === "dark" ? "rgb(46 49 55)" : "",
+                        color: mode === "dark" ? "white" : "",
+                      }}
+                    >
+                      <tr>
+                        <th className="px-6 py-3">S.No</th>
+                        <th className="px-6 py-3">Name</th>
+                        <th className="px-6 py-3">Email</th>
+                        <th className="px-6 py-3">Role</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {user.map((u, index) => (
+                        <tr
+                          key={u.id || index}
+                          className="bg-gray-50 border-b dark:border-gray-700 hover:shadow-lg transition-shadow duration-300"
+                          style={{
+                            backgroundColor:
+                              mode === "dark" ? "rgb(46 49 55)" : "",
+                            color: mode === "dark" ? "white" : "",
+                          }}
+                        >
+                          <td className="px-6 py-4">{index + 1}</td>
+                          <td className="px-6 py-4">{u.name || "N/A"}</td>
+                          <td className="px-6 py-4">{u.email || "N/A"}</td>
+                          <td className="px-6 py-4">{u.role || "User"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </TabPanel>
           </Tabs>
         </div>
       </div>

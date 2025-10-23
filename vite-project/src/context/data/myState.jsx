@@ -46,6 +46,9 @@ function MyState(props) {
 
   const [product, setProduct] = useState([]);
 
+  // ---------------- ORDERS STATE ----------------
+  const [order, setOrder] = useState([]); // ✅ Added order state
+
   // ADD PRODUCT
   const addProduct = async () => {
     if (
@@ -138,8 +141,6 @@ function MyState(props) {
   };
 
   // ---------------- ORDERS SECTION ----------------
-  const [order, setOrder] = useState([]);
-
   const getOrderData = async () => {
     setLoading(true);
     try {
@@ -147,26 +148,27 @@ function MyState(props) {
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const ordersArray = snapshot.docs.map((doc) => {
           const data = doc.data();
-
-          // Handle both new and old Firestore order formats
           const addressInfo = data.addressInfo || {};
           const cartItems = data.cartItems || [];
 
+          // Compute total price
+         const totalPrice = cartItems.reduce(
+           (sum, item) => sum + Number(item.price || 0),
+           0
+         );
+
+          // Get product titles
+          const productNames = cartItems.map((item) => item.title || "Unknown");
+
           return {
             id: doc.id,
-            paymentId: data.paymentId || "",
-            email: data.email || "",
-            userid: data.userid || "",
+            userName: addressInfo.name || data.name || "N/A",
+            products: productNames, // array of product titles
+            totalPrice, // sum of prices
+            status: data.status || "Pending",
             date: data.date || "",
+            userid: data.userid || "", // keep for filtering
             time: data.time || {},
-            // For new structure
-            addressInfo: {
-              name: addressInfo.name || data.name || "",
-              address: addressInfo.address || data.address || "",
-              phoneNumber: addressInfo.phoneNumber || data.phoneNumber || "",
-              pincode: addressInfo.pincode || data.pincode || "",
-            },
-            cartItems,
           };
         });
 
@@ -181,7 +183,7 @@ function MyState(props) {
 
         if (
           storedUser?.role === "admin" ||
-          storedUser?.email === "kaurkraftshop@gmail.com" || // <-- use your actual admin email
+          storedUser?.email === "kaurkraftshop@gmail.com" ||
           !storedUser
         ) {
           setOrder(sorted);
