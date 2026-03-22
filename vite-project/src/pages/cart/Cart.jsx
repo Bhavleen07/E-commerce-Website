@@ -7,6 +7,7 @@ import { deleteFromCart, clearCart } from "../../redux/cartSlice";
 import { toast } from "react-toastify";
 import { addDoc, collection } from "firebase/firestore";
 import { fireDB } from "../../firebase/FirebaseConfig";
+import emailjs from "emailjs-com";
 
 function Cart() {
   const context = useContext(myContext);
@@ -102,13 +103,40 @@ function Cart() {
         };
 
         try {
-          await addDoc(collection(fireDB, "orders"), orderInfo);
-          toast.success("Order saved successfully to Firestore!");
-          dispatch(clearCart());
-        } catch (error) {
-          console.error("Firestore error:", error);
-          toast.error("Failed to save order to Firestore!");
-        }
+  await addDoc(collection(fireDB, "orders"), orderInfo);
+
+  // ✅ CREATE ORDER DETAILS STRING
+  const orderDetails = cartItems
+    .map(
+      (item) =>
+        `${item.title} (₹${item.price}) ${
+          item.customization
+            ? `- ${item.customization.text}`
+            : ""
+        }`
+    )
+    .join("\n");
+
+  // ✅ SEND EMAIL
+  await emailjs.send(
+    "service_wju8esn", // your service id
+    "template_tro0q5k", // your template id
+    {
+      user_name: addressInfo.name,
+      user_email: storedUser.email,
+      order_details: orderDetails,
+      total: grandTotal,
+    },
+    "fiLzDoO3wYOAWK_Ly" // 🔴 paste your public key here
+  );
+
+  toast.success("Order + Email Sent ✅");
+
+  dispatch(clearCart());
+} catch (error) {
+  console.error("Error:", error);
+  toast.error("Something went wrong");
+}
       },
 
       theme: { color: "#3399cc" },
@@ -156,6 +184,15 @@ function Cart() {
                       >
                         {item.title}
                       </h2>
+                      {item.customization && (
+  <div className="mt-2 text-xs sm:text-sm text-gray-600">
+    <p><b>Name:</b> {item.customization.customerName}</p>
+    <p><b>Names:</b> {item.customization.text}</p>
+    <p><b>Date:</b> {item.customization.date}</p>
+    <p><b>Color:</b> {item.customization.color}</p>
+    <p><b>Message:</b> {item.customization.message}</p>
+  </div>
+)}
                       <h2
                         className="text-xs sm:text-sm mt-1"
                         style={{ color: mode === "dark" ? "white" : "" }}
@@ -223,6 +260,7 @@ function Cart() {
               <p className="text-lg font-bold">Total</p>
               <p className="text-lg font-bold">₹{grandTotal}</p>
             </div>
+            
             <Modal
               name={name}
               address={address}

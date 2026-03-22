@@ -9,17 +9,46 @@ import { doc, updateDoc } from "firebase/firestore";
 import { fireDB } from "../../../firebase/FirebaseConfig";
 import Layout from "../../../components/layout/Layout";
 import { toast } from "react-toastify";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { addToCart } from "../../../redux/cartSlice";
+import jsPDF from "jspdf";
 
 function DashboardTab() {
   const context = useContext(myContext);
   const { mode, product, edithandle, deleteProduct, order, user } = context;
 
+  const downloadInvoice = (order) => {
+  const doc = new jsPDF();
+
+  doc.setFontSize(16);
+  doc.text("KaurKrafts Invoice", 20, 20);
+
+  doc.setFontSize(12);
+  doc.text(`Customer: ${order.userName}`, 20, 40);
+  doc.text(`Status: ${order.status}`, 20, 50);
+
+  let y = 70;
+
+  order.cartItems.forEach((item, index) => {
+    doc.text(`Product: ${item.title}`, 20, y);
+    doc.text(`ID: ${item.id}`, 20, y + 10);
+    doc.text(`Price: ₹${item.price}`, 20, y + 20);
+
+    if (item.customization) {
+      doc.text(`Name: ${item.customization.customerName}`, 20, y + 30);
+      doc.text(`Text: ${item.customization.text}`, 20, y + 40);
+      doc.text(`Date: ${item.customization.date}`, 20, y + 50);
+    }
+
+    y += 70;
+  });
+
+  doc.save(`invoice_${order.id}.pdf`);
+  };
+  
   const dispatch = useDispatch();
-  const cartItems = useSelector((state) => state.cart);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const navigate = useNavigate(); // 🔹 Add navigate
+  const navigate = useNavigate();
 
   const addCart = (product) => {
     dispatch(addToCart(product));
@@ -33,53 +62,39 @@ function DashboardTab() {
     try {
       const orderRef = doc(fireDB, "orders", orderId);
       await updateDoc(orderRef, { status: newStatus });
-      alert(`Order status updated to ${newStatus}`);
+      toast.success(`Order updated to ${newStatus}`);
     } catch (error) {
       console.error("Error updating order status:", error);
     }
   };
 
-  // 🔹 Selected product view
+  // 🔹 Product View Page
   if (selectedProduct) {
     return (
       <Layout>
         <div className="container mx-auto px-5 py-10">
           <button
             onClick={closeModal}
-            className="bg-gray-300 text-black px-4 py-2 rounded mb-5"
+            className="bg-gray-300 px-4 py-2 rounded mb-5"
           >
-            ← Back to Products
+            ← Back
           </button>
 
-          <div className="flex flex-col md:flex-row items-center gap-6">
-            <div className="w-full md:w-1/2 overflow-hidden rounded-2xl">
-              <img
-                src={selectedProduct.imageUrl || "/placeholder.png"}
-                alt={selectedProduct.title || "Product"}
-                className="w-full h-64 md:h-96 object-cover rounded-2xl"
-              />
-            </div>
+          <div className="flex flex-col md:flex-row gap-6">
+            <img
+              src={selectedProduct.imageUrl}
+              className="w-full md:w-1/2 rounded"
+              alt=""
+            />
 
-            <div className="md:ml-10 mt-4 md:mt-0 w-full md:w-1/2">
-              <h1
-                className="text-2xl font-bold mb-2"
-                style={{ color: mode === "dark" ? "white" : "" }}
-              >
-                {selectedProduct.title}
-              </h1>
-              <p
-                className="text-gray-600 mb-4"
-                style={{ color: mode === "dark" ? "white" : "" }}
-              >
-                {selectedProduct.description || "No description available."}
-              </p>
-              <h2 className="text-xl font-semibold mb-2">
-                ₹{selectedProduct.price || "-"}
-              </h2>
+            <div>
+              <h1 className="text-2xl font-bold">{selectedProduct.title}</h1>
+              <p className="mt-2">{selectedProduct.description}</p>
+              <h2 className="text-xl mt-3">₹{selectedProduct.price}</h2>
+
               <button
-                type="button"
                 onClick={() => addCart(selectedProduct)}
-                className="focus:outline-none text-white bg-pink-600 hover:bg-pink-700 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm w-full py-2"
+                className="bg-pink-600 text-white px-4 py-2 mt-4 rounded"
               >
                 Add To Cart
               </button>
@@ -90,270 +105,280 @@ function DashboardTab() {
     );
   }
 
-  // 🔹 Default Dashboard Tabs
   return (
-    <div>
-      <div className="container mx-auto">
-        <div className="tab container mx-auto ">
-          <Tabs defaultIndex={0}>
-            <TabList className="md:flex md:space-x-8 grid grid-cols-2 text-center gap-4 md:justify-center mb-10 ">
-              <Tab>
-                <button
-                  type="button"
-                  className="font-medium border-b-2 hover:shadow-purple-700 border-purple-500 text-purple-500 rounded-lg text-xl shadow-[inset_0_0_8px_rgba(0,0,0,0.6)]  px-5 py-1.5 text-center bg-[#605d5d12]"
-                >
-                  <div className="flex gap-2 items-center">
-                    <MdOutlineProductionQuantityLimits />
-                    Products
-                  </div>
-                </button>
-              </Tab>
-              <Tab>
-                <button
-                  type="button"
-                  className="font-medium border-b-2 border-pink-500 bg-[#605d5d12] text-pink-500  hover:shadow-pink-700  rounded-lg text-xl shadow-[inset_0_0_8px_rgba(0,0,0,0.6)] px-5 py-1.5 text-center "
-                >
-                  <div className="flex gap-2 items-center">
-                    <AiFillShopping /> Order
-                  </div>
-                </button>
-              </Tab>
-              <Tab>
-                <button
-                  type="button"
-                  className="font-medium border-b-2 border-green-500 bg-[#605d5d12] text-green-500 rounded-lg text-xl  hover:shadow-green-700 shadow-[inset_0_0_8px_rgba(0,0,0,0.6)] px-5 py-1.5 text-center "
-                >
-                  <div className="flex gap-2 items-center">
-                    <FaUser /> Users
-                  </div>
-                </button>
-              </Tab>
-            </TabList>
+    <div className="container mx-auto">
+      <Tabs defaultIndex={0}>
+        {/* TAB BUTTONS */}
+        <TabList className="flex justify-center gap-6 mb-10">
+          <Tab>
+            <button className="text-purple-500 flex items-center gap-2">
+              <MdOutlineProductionQuantityLimits /> Products
+            </button>
+          </Tab>
+          <Tab>
+            <button className="text-pink-500 flex items-center gap-2">
+              <AiFillShopping /> Orders
+            </button>
+          </Tab>
+          <Tab>
+            <button className="text-green-500 flex items-center gap-2">
+              <FaUser /> Users
+            </button>
+          </Tab>
+        </TabList>
 
-            {/* Product Tab */}
-            <TabPanel>
-              <div className="px-4 md:px-0 mb-16">
-                <h1
-                  className="text-center mb-5 text-3xl font-semibold underline"
-                  style={{ color: mode === "dark" ? "white" : "" }}
-                >
-                  Product Details
-                </h1>
-                <div className="flex justify-end mb-4">
-                  <div onClick={goToAdd}>
-                    <button
-                      type="button"
-                      className="focus:outline-none text-white bg-pink-600 shadow-[inset_0_0_10px_rgba(0,0,0,0.6)] border hover:bg-pink-700 outline-0 font-medium rounded-lg text-sm px-5 py-2.5"
-                      style={{
-                        backgroundColor: mode === "dark" ? "rgb(46 49 55)" : "",
-                        color: mode === "dark" ? "white" : "",
-                      }}
-                    >
-                      <div className="flex gap-2 items-center">
-                        Add Product <FaCartPlus size={20} />
-                      </div>
-                    </button>
-                  </div>
-                </div>
+        {/* ================= PRODUCT TAB ================= */}
+        <TabPanel>
+          <h1 className="text-center text-2xl font-bold mb-5">
+            Product Details
+          </h1>
 
-                <div className="relative overflow-x-auto">
-                  <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                    <thead
-                      className="text-xs border border-gray-600 text-black uppercase bg-gray-200 shadow-[inset_0_0_8px_rgba(0,0,0,0.6)]"
-                      style={{
-                        backgroundColor: mode === "dark" ? "rgb(46 49 55)" : "",
-                        color: mode === "dark" ? "white" : "",
-                      }}
-                    >
-                      <tr>
-                        <th className="px-6 py-3">S.No</th>
-                        <th className="px-6 py-3">Image</th>
-                        <th className="px-6 py-3">Title</th>
-                        <th className="px-6 py-3">Price</th>
-                        <th className="px-6 py-3">Category</th>
-                        <th className="px-6 py-3">Date</th>
-                        <th className="px-6 py-3">Action</th>
-                      </tr>
-                    </thead>
-                    {product.map((item, index) => {
-                      const { title, price, imageUrl, category, date } = item;
-                      return (
-                        <tbody key={item.id || index}>
-                          <tr
-                            className="bg-gray-50 border-b dark:border-gray-700 cursor-pointer hover:shadow-lg transition-shadow duration-300"
-                            style={{
-                              backgroundColor:
-                                mode === "dark" ? "rgb(46 49 55)" : "",
-                              color: mode === "dark" ? "white" : "",
-                            }}
-                            onClick={() => navigate(`/productinfo/${item.id}`)} // 🔹 Updated
-                          >
-                            <td className="px-6 py-4">{index + 1}.</td>
-                            <th
-                              scope="row"
-                              className="px-6 py-4 font-medium whitespace-nowrap"
-                            >
-                              <div className="w-20 h-20 overflow-hidden rounded-2xl">
-                                <img
-                                  className="w-full h-full object-cover"
-                                  src={imageUrl || "/placeholder.png"}
-                                  alt={title || "Product"}
-                                />
-                              </div>
-                            </th>
-                            <td className="px-6 py-4">{title}</td>
-                            <td className="px-6 py-4">₹{price}</td>
-                            <td className="px-6 py-4">{category}</td>
-                            <td className="px-6 py-4">{date}</td>
-                            <td className="px-6 py-4">
-                              <div
-                                className="flex gap-2 cursor-pointer"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <div onClick={() => deleteProduct(item)}>
-                                  {/* delete icon */}
-                                </div>
-                                <div>
-                                  <Link
-                                    to={"/updateproduct"}
-                                    onClick={() => edithandle(item)}
-                                  >
-                                    {/* edit icon */}
-                                  </Link>
-                                </div>
-                              </div>
-                            </td>
-                          </tr>
-                        </tbody>
-                      );
-                    })}
-                  </table>
-                </div>
+          <button
+            onClick={goToAdd}
+            className="bg-pink-600 text-white px-4 py-2 rounded mb-5"
+          >
+            Add Product
+          </button>
+
+          <table className="w-full text-left border">
+            <thead>
+              <tr className="bg-gray-200">
+                <th>S.No</th>
+                <th>Image</th>
+                <th>Title</th>
+                <th>Price</th>
+                <th>Category</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {product.map((item, index) => (
+                <tr key={item.id}>
+                  <td>{index + 1}</td>
+                  <td>
+                    <img src={item.imageUrl} className="w-20 h-20" />
+                  </td>
+                  <td>{item.title}</td>
+                  <td>₹{item.price}</td>
+                  <td>{item.category}</td>
+                  <td>{item.date}</td>
+                  <td>
+                    <button onClick={() => deleteProduct(item)}>Delete</button>
+                    <Link to="/updateproduct" onClick={() => edithandle(item)}>
+                      Edit
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </TabPanel>
+
+        {/* ================= ORDER TAB ================= */}
+        <TabPanel>
+  <h1 className="text-center text-2xl font-bold mb-5">
+    Order Details
+  </h1>
+
+  {/* ================= MOBILE VIEW (CARDS) ================= */}
+  <div className="block md:hidden space-y-4">
+    {order.map((item, index) => (
+      <div
+        key={item.id}
+        className="bg-white shadow-md rounded-lg p-4 border"
+      >
+        <p className="text-sm font-semibold mb-1">
+          Order #{index + 1}
+        </p>
+
+        <p className="text-xs text-gray-500 mb-2">
+          Customer: {item.addressInfo?.name || "N/A"}
+        </p>
+
+        {/* PRODUCTS */}
+        {item.cartItems?.map((cartItem, i) => (
+          <div key={i} className="border-t pt-2 mt-2">
+            <p className="font-semibold text-sm">
+              {cartItem.title}
+            </p>
+
+            <p className="text-[10px] text-gray-500">
+              ID: {cartItem.id}
+            </p>
+
+            {cartItem.customization && (
+              <div className="text-[11px] mt-1">
+                <p>Name: {cartItem.customization.customerName}</p>
+                <p>Names: {cartItem.customization.text}</p>
+                <p>Date: {cartItem.customization.date}</p>
+                <p>Color: {cartItem.customization.color}</p>
+                <p>Message: {cartItem.customization.message}</p>
               </div>
-            </TabPanel>
+            )}
 
-            {/* Order Tab */}
-            <TabPanel>
-              <div className="px-4 md:px-0 mb-16">
-                <h1
-                  className="text-center mb-5 text-3xl font-semibold underline"
-                  style={{ color: mode === "dark" ? "white" : "" }}
-                >
-                  Order Details
-                </h1>
+            {/* WhatsApp */}
+            <a
+              href={`https://wa.me/918699741106?text=${encodeURIComponent(
+                `New Custom Order:
 
-                <div className="relative overflow-x-auto">
-                  <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                    <thead
-                      className="text-xs border border-gray-600 text-black uppercase bg-gray-200 shadow-[inset_0_0_8px_rgba(0,0,0,0.6)]"
-                      style={{
-                        backgroundColor: mode === "dark" ? "rgb(46 49 55)" : "",
-                        color: mode === "dark" ? "white" : "",
-                      }}
-                    >
-                      <tr>
-                        <th className="px-6 py-3">S.No</th>
-                        <th className="px-6 py-3">User</th>
-                        <th className="px-6 py-3">Products</th>
-                        <th className="px-6 py-3">Total Price</th>
-                        <th className="px-6 py-3">Status</th>
-                        <th className="px-6 py-3">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {order.map((item, index) => (
-                        <tr
-                          key={item.id || index}
-                          className="bg-gray-50 border-b dark:border-gray-700 hover:shadow-lg transition-shadow duration-300"
-                          style={{
-                            backgroundColor:
-                              mode === "dark" ? "rgb(46 49 55)" : "",
-                            color: mode === "dark" ? "white" : "",
-                          }}
-                        >
-                          <td className="px-6 py-4">{index + 1}</td>
-                          <td className="px-6 py-4">
-                            {item.userName || "N/A"}
-                          </td>
-                          <td className="px-6 py-4">
-                            {item.products && item.products.length > 0
-                              ? item.products.join(", ")
-                              : "-"}
-                          </td>
-                          <td className="px-6 py-4">₹{item.totalPrice || 0}</td>
-                          <td className="px-6 py-4">{item.status}</td>
-                          <td className="px-6 py-4">
-                            <select
-                              value={item.status}
-                              onChange={(e) =>
-                                updateStatus(item.id, e.target.value)
-                              }
-                              className="border px-2 py-1 rounded bg-white dark:bg-gray-700 text-black dark:text-white"
-                            >
-                              <option value="Pending">Pending</option>
-                              <option value="Delivered">Delivered</option>
-                              <option value="Completed">Completed</option>
-                            </select>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </TabPanel>
+Product: ${cartItem.title}
+Product ID: ${cartItem.id}
 
-            {/* User Tab */}
-            <TabPanel>
-              <div className="px-4 md:px-0 mb-16">
-                <h1
-                  className="text-center mb-5 text-3xl font-semibold underline"
-                  style={{ color: mode === "dark" ? "white" : "" }}
-                >
-                  User Details
-                </h1>
+Customer: ${cartItem.customization?.customerName}
+Names: ${cartItem.customization?.text}
+Date: ${cartItem.customization?.date}
+Color: ${cartItem.customization?.color}
+Message: ${cartItem.customization?.message}`
+              )}`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-block mt-2 px-2 py-1 bg-green-600 text-white text-[10px] rounded"
+            >
+              WhatsApp
+            </a>
+          </div>
+        ))}
 
-                <div className="relative overflow-x-auto">
-                  <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                    <thead
-                      className="text-xs border border-gray-600 text-black uppercase bg-gray-200 shadow-[inset_0_0_8px_rgba(0,0,0,0.6)]"
-                      style={{
-                        backgroundColor: mode === "dark" ? "rgb(46 49 55)" : "",
-                        color: mode === "dark" ? "white" : "",
-                      }}
-                    >
-                      <tr>
-                        <th className="px-6 py-3">S.No</th>
-                        <th className="px-6 py-3">Name</th>
-                        <th className="px-6 py-3">Email</th>
-                        <th className="px-6 py-3">Role</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {user.map((u, index) => (
-                        <tr
-                          key={u.id || index}
-                          className="bg-gray-50 border-b dark:border-gray-700 hover:shadow-lg transition-shadow duration-300"
-                          style={{
-                            backgroundColor:
-                              mode === "dark" ? "rgb(46 49 55)" : "",
-                            color: mode === "dark" ? "white" : "",
-                          }}
-                        >
-                          <td className="px-6 py-4">{index + 1}</td>
-                          <td className="px-6 py-4">{u.name || "N/A"}</td>
-                          <td className="px-6 py-4">{u.email || "N/A"}</td>
-                          <td className="px-6 py-4">{u.role || "User"}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </TabPanel>
-          </Tabs>
+        {/* TOTAL */}
+        <p className="mt-3 text-sm font-bold">
+          Total: ₹
+          {item.cartItems?.reduce(
+            (acc, curr) => acc + parseInt(curr.price),
+            0
+          )}
+        </p>
+
+        {/* STATUS + ACTION */}
+        <div className="mt-3 flex flex-col gap-2">
+          <select
+            value={item.status}
+            onChange={(e) =>
+              updateStatus(item.id, e.target.value)
+            }
+            className="border p-1 rounded text-xs"
+          >
+            <option value="Pending">Pending</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Completed">Completed</option>
+          </select>
+
+          <button
+            onClick={() => downloadInvoice(item)}
+            className="bg-black text-white px-2 py-1 text-xs rounded"
+          >
+            Download Invoice
+          </button>
         </div>
       </div>
+    ))}
+  </div>
+
+  {/* ================= DESKTOP VIEW (TABLE) ================= */}
+  <div className="hidden md:block overflow-x-auto">
+    <table className="min-w-[800px] w-full text-left border">
+      <thead>
+        <tr className="bg-gray-200 text-sm">
+          <th className="p-2">S.No</th>
+          <th className="p-2">User</th>
+          <th className="p-2">Products</th>
+          <th className="p-2">Total</th>
+          <th className="p-2">Status</th>
+          <th className="p-2">Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {order.map((item, index) => (
+          <tr key={item.id} className="border-b text-sm">
+            <td className="p-2">{index + 1}</td>
+
+            <td className="p-2">
+              {item.addressInfo?.name || "N/A"}
+            </td>
+
+            <td className="p-2">
+              {item.cartItems?.map((cartItem, i) => (
+                <div key={i} className="mb-2">
+                  <p className="font-semibold">
+                    {cartItem.title}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    ID: {cartItem.id}
+                  </p>
+                </div>
+              ))}
+            </td>
+
+            <td className="p-2">
+              ₹
+              {item.cartItems?.reduce(
+                (acc, curr) => acc + parseInt(curr.price),
+                0
+              )}
+            </td>
+
+            <td className="p-2">{item.status}</td>
+
+            <td className="p-2">
+              <div className="flex flex-col gap-2">
+                <select
+                  value={item.status}
+                  onChange={(e) =>
+                    updateStatus(item.id, e.target.value)
+                  }
+                  className="border p-1 rounded text-xs"
+                >
+                  <option value="Pending">Pending</option>
+                  <option value="Delivered">Delivered</option>
+                  <option value="Completed">Completed</option>
+                </select>
+
+                <button
+                  onClick={() => downloadInvoice(item)}
+                  className="bg-black text-white px-2 py-1 text-xs rounded"
+                >
+                  Invoice
+                </button>
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</TabPanel>
+
+        {/* ================= USER TAB ================= */}
+        <TabPanel>
+          <h1 className="text-center text-2xl font-bold mb-5">
+            User Details
+          </h1>
+
+          <table className="w-full text-left border">
+            <thead>
+              <tr className="bg-gray-200">
+                <th>S.No</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {user.map((u, index) => (
+                <tr key={u.id}>
+                  <td>{index + 1}</td>
+                  <td>{u.name}</td>
+                  <td>{u.email}</td>
+                  <td>{u.role}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </TabPanel>
+      </Tabs>
     </div>
   );
 }

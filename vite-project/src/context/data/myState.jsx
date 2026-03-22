@@ -161,15 +161,21 @@ function MyState(props) {
           const productNames = cartItems.map((item) => item.title || "Unknown");
 
           return {
-            id: doc.id,
-            userName: addressInfo.name || data.name || "N/A",
-            products: productNames, // array of product titles
-            totalPrice, // sum of prices
-            status: data.status || "Pending",
-            date: data.date || "",
-            userid: data.userid || "", // keep for filtering
-            time: data.time || {},
-          };
+  id: doc.id,
+
+  // ✅ KEEP ORIGINAL DATA
+  addressInfo: data.addressInfo || {},
+  cartItems: data.cartItems || [],
+
+  // ✅ OPTIONAL EXTRA
+  userName: addressInfo.name || data.name || "N/A",
+  products: productNames,
+  totalPrice,
+  status: data.status || "Pending",
+  date: data.date || "",
+  userid: data.userid || "",
+  time: data.time || {},
+};
         });
 
         // Sort newest first
