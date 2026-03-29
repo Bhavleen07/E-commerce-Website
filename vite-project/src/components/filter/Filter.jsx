@@ -70,8 +70,19 @@ function Filter() {
           <div className="flex items-center justify-between mt-4">
             <p className="font-medium">Filters</p>
             <button
-              className="px-4 py-2 bg-gray-50 hover:bg-gray-200 text-gray-800 text-sm font-medium rounded-md"
-              style={{ color: mode === "dark" ? "white" : "" }}
+              className="px-4 py-2 text-sm font-medium rounded-md transition"
+style={{
+  backgroundColor: mode === "dark" ? "#374151" : "#f9fafb",
+  color: mode === "dark" ? "white" : "#1f2937",
+}}
+onMouseEnter={(e) =>
+  (e.target.style.backgroundColor =
+    mode === "dark" ? "#4b5563" : "#e5e7eb")
+}
+onMouseLeave={(e) =>
+  (e.target.style.backgroundColor =
+    mode === "dark" ? "#374151" : "#f9fafb")
+}
               onClick={() => {
                 setFilterType("");
                 setFilterPrice("");
@@ -88,7 +99,11 @@ function Filter() {
               <select
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
-                className="px-4 py-3 w-full rounded-lg border border-pink-600 bg-white text-gray-800 shadow-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm cursor-pointer transition"
+                className="px-4 py-3 w-full rounded-lg border border-pink-600 shadow-sm text-sm cursor-pointer transition"
+                style={{
+                backgroundColor: mode === "dark" ? "#374151" : "white",
+                color: mode === "dark" ? "white" : "#1f2937",
+}}
               >
                 <option value="">All Categories</option>
                 {categories.map((cat, index) => (
@@ -102,7 +117,11 @@ function Filter() {
               <select
                 value={filterPrice}
                 onChange={(e) => setFilterPrice(e.target.value)}
-                className="px-4 py-3 w-full rounded-lg border border-pink-600 bg-white text-gray-800 shadow-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm cursor-pointer transition"
+              className="px-4 py-3 w-full rounded-lg border border-pink-600 shadow-sm text-sm cursor-pointer transition"
+              style={{
+              backgroundColor: mode === "dark" ? "#374151" : "white",
+              color: mode === "dark" ? "white" : "#1f2937",
+}}
               >
                 <option value="">All Prices</option>
                 {priceRanges.map((range, index) => (

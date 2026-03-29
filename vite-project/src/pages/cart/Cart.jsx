@@ -118,17 +118,18 @@ function Cart() {
     .join("\n");
 
   // ✅ SEND EMAIL
-  await emailjs.send(
-    "service_wju8esn", // your service id
-    "template_tro0q5k", // your template id
-    {
-      user_name: addressInfo.name,
-      user_email: storedUser.email,
-      order_details: orderDetails,
-      total: grandTotal,
-    },
-    "fiLzDoO3wYOAWK_Ly" // 🔴 paste your public key here
-  );
+ await emailjs.send(
+  "service_wju8esn",
+  "template_tro0q5k",
+  {
+    name: addressInfo.name,
+    email: storedUser.email,
+    products: orderDetails,
+    price: grandTotal,
+    address: addressInfo.address,
+  },
+  "fiLzDoO3wYOAWK_Ly"
+);
 
   toast.success("Order + Email Sent ✅");
 

@@ -364,9 +364,7 @@ export default function Navbar() {
                         color: "white",
                       }}
                     >
-                      {user?.user?.name
-                        ? user.user.name.charAt(0).toUpperCase()
-                        : "U"}
+                      {(user?.name || user?.user?.name || "U").charAt(0).toUpperCase()}
                     </div>
                   </a>
                 </div>

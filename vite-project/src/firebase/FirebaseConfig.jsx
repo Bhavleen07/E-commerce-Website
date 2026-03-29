@@ -10,6 +10,7 @@ const firebaseConfig = {
   storageBucket: "kaurkraftshop-d8a7e.firebasestorage.app",
   messagingSenderId: "535459143395",
   appId: "1:535459143395:web:6ea8d41cc4f5c189deafd6"
+  
 };
 
 // Initialize Firebase
