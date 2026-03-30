@@ -209,14 +209,24 @@ function DashboardTab() {
             </p>
 
             {cartItem.customization && (
-              <div className="text-[11px] mt-1">
-                <p>Name: {cartItem.customization.customerName}</p>
-                <p>Names: {cartItem.customization.text}</p>
-                <p>Date: {cartItem.customization.date}</p>
-                <p>Color: {cartItem.customization.color}</p>
-                <p>Message: {cartItem.customization.message}</p>
-              </div>
-            )}
+             <div className="text-[11px] mt-1 space-y-1">
+              <p>Name: {cartItem.customization.customerName}</p>
+              <p>Names: {cartItem.customization.text}</p>
+              <p>Date: {cartItem.customization.date}</p>
+
+    {/* 🎨 COLOR BOX */}
+    <div className="flex items-center gap-2">
+      <span>Color:</span>
+      <div
+        className="w-4 h-4 rounded-full border"
+        style={{ backgroundColor: cartItem.customization.color }}
+      ></div>
+      <span>{cartItem.customization.color}</span>
+    </div>
+
+    <p>Message: {cartItem.customization.message}</p>
+  </div>
+)}
 
             {/* WhatsApp */}
             <a
@@ -299,17 +309,40 @@ Message: ${cartItem.customization?.message}`
             </td>
 
             <td className="p-2">
-              {item.cartItems?.map((cartItem, i) => (
-                <div key={i} className="mb-2">
-                  <p className="font-semibold">
-                    {cartItem.title}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    ID: {cartItem.id}
-                  </p>
-                </div>
-              ))}
-            </td>
+  {item.cartItems?.map((cartItem, i) => (
+    <div key={i} className="mb-3 border-b pb-2">
+      
+      <p className="font-semibold">
+        {cartItem.title}
+      </p>
+
+      <p className="text-xs text-gray-500">
+        ID: {cartItem.id}
+      </p>
+
+      {/* 🔥 CUSTOMIZATION DETAILS */}
+      {cartItem.customization && (
+        <div className="text-xs mt-1 space-y-1">
+          <p><b>Name:</b> {cartItem.customization.customerName}</p>
+          <p><b>Names:</b> {cartItem.customization.text}</p>
+          <p><b>Date:</b> {cartItem.customization.date}</p>
+
+          {/* 🎨 COLOR SHOW AS BOX (NOT TEXT CODE) */}
+          <div className="flex items-center gap-2">
+            <span><b>Color:</b></span>
+            <div
+              className="w-4 h-4 rounded-full border"
+              style={{ backgroundColor: cartItem.customization.color }}
+            ></div>
+            <span>{cartItem.customization.color}</span>
+          </div>
+
+          <p><b>Message:</b> {cartItem.customization.message}</p>
+        </div>
+      )}
+    </div>
+  ))}
+</td>
 
             <td className="p-2">
               ₹

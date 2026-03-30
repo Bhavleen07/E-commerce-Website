@@ -29,20 +29,23 @@ function Allproducts() {
     window.scrollTo(0, 0);
   }, []);
 
-  const filteredProducts = product
-    .filter((obj) =>
-      obj.title.toLowerCase().includes(searchkey ? searchkey.toLowerCase() : "")
-    )
-    .filter((obj) =>
-      obj.category
-        .toLowerCase()
-        .includes(filterType ? filterType.toLowerCase() : "")
-    )
-    .filter((obj) => {
-      if (!filterPrice) return true;
-      const [min, max] = filterPrice.split("-").map(Number);
-      return obj.price >= min && obj.price <= max;
-    });
+ const filteredProducts = product
+  // 🔍 SEARCH FILTER
+  .filter((obj) =>
+    obj.title.toLowerCase().includes(searchkey ? searchkey.toLowerCase() : "")
+  )
+
+  // 🧵 CATEGORY FILTER (THIS WAS MISSING)
+  .filter((obj) =>
+    filterType ? obj.category === filterType : true
+  )
+
+  // 💰 PRICE FILTER
+  .filter((obj) => {
+    if (!filterPrice) return true;
+    const [min, max] = filterPrice.split("-").map(Number);
+    return Number(obj.price) >= min && Number(obj.price) <= max;
+  });
 
   return (
     <Layout>
@@ -66,18 +69,19 @@ function Allproducts() {
                 <div
                   onClick={() => navigate(`/productinfo/${id}`)}
                   key={index}
-                  className="cursor-pointer border-2 hover:shadow-xl transition-shadow duration-300 ease-in-out border-gray-200 border-opacity-60 rounded-2xl overflow-hidden"
+                  className="cursor-pointer border-2 hover:shadow-xl transition-all duration-300 ease-in-out border-gray-200 border-opacity-60 rounded-2xl overflow-hidden animate-slide-up"
                   style={{
-                    backgroundColor: mode === "dark" ? "rgb(46 49 55)" : "",
-                    color: mode === "dark" ? "white" : "",
-                  }}
+                  backgroundColor: mode === "dark" ? "rgb(46 49 55)" : "",
+                  color: mode === "dark" ? "white" : "",
+                  animationDelay: `${index * 0.08}s`,
+}}
                 >
-                  <div className="overflow-hidden w-full h-56 sm:h-64 md:h-72 rounded-t-2xl">
-                    <img
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 ease-in-out"
-                      src={imageUrl}
-                      alt={title}
-                    />
+                  <div className="w-full h-56 sm:h-64 md:h-72 bg-white flex items-center justify-center overflow-hidden rounded-t-2xl">
+                  <img
+                  src={imageUrl}
+                  alt={title}
+                  className="max-h-full max-w-full object-contain transition-transform duration-300 hover:scale-105"
+                  />
                   </div>
                   <div className="p-3 sm:p-4 border-t-2">
                     <h2

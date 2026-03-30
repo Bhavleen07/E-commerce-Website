@@ -27,7 +27,11 @@ export default function Navbar() {
   };
 
   const cartItems = useSelector((state) => state.cart);
-
+const userName =
+  user?.name ||
+  user?.user?.name ||
+  user?.email ||
+    "User";
   return (
     <div className="bg-white sticky top-0 z-50">
       {/* Mobile menu */}
@@ -153,18 +157,16 @@ export default function Navbar() {
                     </div>
                   )}
 
-                  <div className="flow-root">
-                    <Link
-                      to={"/"}
-                      className="-m-2 block p-2 font-medium text-gray-900 cursor-pointer"
-                    >
-                      <img
-                        className="inline-block w-10 h-10 rounded-full"
-                        src="https://overreacted.io/static/profile-pic-c715447ce38098828758e525a1128b87.jpg"
-                        alt="Profile"
-                      />
-                    </Link>
-                  </div>
+                  <div
+  title={userName}
+  className="inline-flex items-center justify-center w-10 h-10 rounded-full text-lg font-bold"
+  style={{
+    backgroundColor: mode === "dark" ? "#374151" : "#db2777",
+    color: "white",
+  }}
+>
+  {userName ? userName.charAt(0).toUpperCase() : "U"}
+</div>
                 </div>
 
                 <div className="border-t border-gray-200 px-4 py-6">
@@ -357,6 +359,7 @@ export default function Navbar() {
                 <div className="hidden lg:ml-8 lg:flex">
                   <a href="#" className="flex items-center text-gray-700 ">
                     <div
+                      title={userName}
                       className="inline-flex items-center justify-center w-10 h-10 rounded-full text-lg font-bold"
                       style={{
                         backgroundColor:
@@ -364,7 +367,7 @@ export default function Navbar() {
                         color: "white",
                       }}
                     >
-                      {(user?.name || user?.user?.name || "U").charAt(0).toUpperCase()}
+                      {userName.charAt(0).toUpperCase()}
                     </div>
                   </a>
                 </div>

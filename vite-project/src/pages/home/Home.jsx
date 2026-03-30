@@ -11,14 +11,14 @@ import AIGiftRecommender from "../../components/AIGiftRecommender";
 
 // Optional: simple particle background effect
 import Particles from "react-tsparticles";
-import { loadFull } from "tsparticles";
+import { loadSlim } from "tsparticles-slim";
 
 function Home() {
   const { mode } = useContext(MyContext);
   const [aiProducts, setAiProducts] = useState([]);
 
   const particlesInit = async (engine) => {
-    await loadFull(engine);
+    await loadSlim(engine);
   };
 
   return (
@@ -26,10 +26,6 @@ function Home() {
       {/* Hero */}
       <HeroSection />
 
-      {/* Filter */}
-      <div className="mt-8 px-4 md:px-8">
-        <Filter />
-      </div>
 
       {/* ---------------- AI Gift Recommender Section ---------------- */}
       <section
@@ -78,14 +74,14 @@ function Home() {
       {aiProducts.length > 0 && (
         <section className="mt-12 px-4 md:px-8">
           <h3 className="text-xl md:text-2xl font-semibold mb-6 text-center">
-            Suggested Products
+             🔥 Top Picks for You
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {aiProducts.map((product) => (
+            {aiProducts.map((product, index) => (
               <div
-                key={product.id}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transition-transform duration-300"
-              >
+              key={product.id}
+              className="rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:scale-105 hover:border-2 hover:border-pink-500 bg-white dark:bg-gray-800"
+>
                 <ProductCard product={product} />
               </div>
             ))}

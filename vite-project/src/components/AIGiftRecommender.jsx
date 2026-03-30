@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import { getGiftSuggestionsFromPrompt } from "../utils/aiHelper";
 import MyContext from "../context/data/myContext";
 
-export default function AIGiftRecommender({ mode }) {
+export default function AIGiftRecommender({ mode, onProducts }) {
   const [prompt, setPrompt] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const { product } = useContext(MyContext);
